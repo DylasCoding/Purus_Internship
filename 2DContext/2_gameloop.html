@@ -1,0 +1,42 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Setup Test</title>
+</head>
+<body>
+    <canvas id="canvas" width="750" height="400" style="border:1px solid lightgrey;">
+        Your browser does not support the HTML5 canvas tag.
+    </canvas>
+
+    <script>
+        "use strict";
+        let canvas;
+        let context;
+
+        window.onload = init;
+
+        function init(){
+            canvas = document.getElementById('canvas');
+            context = canvas.getContext('2d');
+
+            // Start the first frame request
+            //setInterval : gọi hàm draw mỗi 1000ms (1 giây), nhưng không đồng bộ với tốc độ làm mới của trình
+            window.requestAnimationFrame(gameLoop); // hàm xử lý vòng lặp 1 cách an toàn
+        }
+
+        function gameLoop(timeStamp){
+            draw();
+
+            // Keep requesting new frames
+            window.requestAnimationFrame(gameLoop);
+        }
+
+        function draw(){
+            let randomColor = Math.random() > 0.5? '#ff8080' : '#0099b0';
+            context.fillStyle = randomColor;
+            context.fillRect(100, 50, 200, 175);
+        }
+    </script>
+</body>
+</html>

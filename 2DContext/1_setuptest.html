@@ -1,0 +1,70 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Setup Test</title>
+</head>
+<body>
+    <canvas id="canvas" width="750" height="400" style="border:1px solid lightgrey;">
+        Your browser does not support the HTML5 canvas tag.
+    </canvas>
+
+    <script>
+        "use strict";
+        let canvas;
+        let context;
+
+        window.onload = init;
+
+        function init() {
+            canvas = document.getElementById("canvas");
+            context = canvas.getContext("2d");
+
+            draw();
+        }
+
+        function draw() {
+            let randomColor = Math.random() > 0.5 ? '#ff8080' : '#0099b0';
+
+            //rectangle
+            // context.fillStyle = randomColor;
+            // context.fillRect(100, 50, 200, 175);
+
+            //circle
+            // context.beginPath();
+            // context.arc(200, 100, 50, 0, 2 * Math.PI); // x, y, radius, startAngle, endAngle
+            // context.fill();
+
+            //line
+            context.beginPath();
+            context.lineWidth = 5;  // độ dày của đường viền
+            context.moveTo(50, 50); // tọa độ đặt bút
+            context.lineTo(250, 150); // tọa độ điểm kết thúc
+            context.stroke();           //vẽ đường viền
+
+            //triangle
+            context.beginPath();
+            context.moveTo(200, 100);
+            context.lineTo(250, 150);
+            context.lineTo(250, 50);
+            context.fill();
+
+            //heart SVG(Scalable Vector Graphics) vector path
+            let path = new Path2D('M 104.22331,133.37668 C -1.5072094,-35.219492 103.13006,33.890796 103.13006,33.890796 c 0,0 101.73939,-69.935966 1.09325,99.485884 z');
+
+            context.beginPath();
+            context.strokeStyle = '#0099b0';
+            context.fillStyle = '#ff8080';
+            context.stroke(path);
+            context.fill(path);
+
+            //text
+            context.fillStyle = 'black';
+            context.fillText("Purus Games", 300, 100);
+            context.font = '40px Arial';
+            context.textAlign = 'right';        //trái phải dòng kẻ
+            context.textBaseline = 'bottom'; //trên dưới dòng kẻ
+        }
+    </script>
+</body>
+</html>

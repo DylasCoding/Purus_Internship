@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Setup Test - Circle Easing</title>
+</head>
+<body>
+<canvas id="canvas" width="750" height="400" style="border:1px solid lightgrey;"></canvas>
+
+<script>
+    "use strict";
+    let canvas;
+    let context;
+
+    window.onload = init;
+
+    function init() {
+        canvas = document.getElementById('canvas');
+        context = canvas.getContext('2d');
+
+        window.requestAnimationFrame(gameLoop);
+    }
+
+    let circleX = 650;
+    let circleY = 50;
+    let radius = 40;
+
+    let secondsPassed = 0;
+    let oldTimeStamp = 0;
+    let timePassed = 0;
+
+    function gameLoop(timeStamp) {
+        secondsPassed = (timeStamp - oldTimeStamp) / 1000;
+        secondsPassed = Math.min(secondsPassed, 0.1);
+        oldTimeStamp = timeStamp;
+
+        update(secondsPassed);
+        draw();
+
+        window.requestAnimationFrame(gameLoop);
+    }
+
+    function draw() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        context.fillStyle = '#4da6ff';
+        context.beginPath();
+        context.arc(circleX, circleY, radius, 0, Math.PI * 2);
+        context.fill();
+    }
+
+    function update(secondsPassed) {
+        timePassed += secondsPassed;
+        let duration = 1.5;
+        let t = Math.min(timePassed, duration);
+
+        circleX = easeInQuart(t, 50, 550, duration);
+        circleY = easeLinear(t, 50, 250, duration);
+    }
+
+
+    function easeInQuart (t, b, c, d) {
+        t /= d;
+        return c * t * t * t * t + b;
+    }
+
+    function easeLinear (t, b, c, d) {
+        return c * t / d + b;
+    }
+</script>
+</body>
+</html>

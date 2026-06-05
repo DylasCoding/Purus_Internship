@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Mô phỏng Vật lý Canvas HTML5</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; background: #222; margin: 0; }
+        canvas { background: #fff; border: 2px solid #555; }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas" width="750" height="400"></canvas>
+
+<script>
+    "use strict";
+
+    // Khởi chạy khi trang web tải xong
+    window.onload = init;
+
+    let canvas;
+    let context;
+    let gameObjects;
+    let oldTimeStamp = 0;
+
+    function init() {
+        canvas = document.getElementById('canvas');
+        context = canvas.getContext('2d');
+
+        gameObjects = [
+            new Circle(context, 250, 50, 0, 50, 50, 5, 0.8),
+            new Circle(context, 250, 300, 0, -50, 50, 5, 0.8),
+            new Circle(context, 150, 0, 50, 50, 25, 1, 0.8),
+            new Circle(context, 250, 150, 50, 50, 25, 1, 0.8),
+            new Circle(context, 350, 75, -50, 50, 25, 1, 0.8),
+            new Circle(context, 300, 300, 50, -50, 25, 1, 0.8),
+        ];
+
+        window.requestAnimationFrame(gameLoop);
+    }
+
+    class GameObject {
+        constructor(context, x, y, vx, vy, radius, mass, restitution) {
+            this.context = context;
+            this.x = x;
+            this.y = y;
+            this.vx = vx; // Vận tốc x
+            this.vy = vy; // Vận tốc y
+            this.radius = radius;
+            this.mass = mass; // Khối lượng - ảnh hưởng đến cách vật phản ứng khi va chạm nhẹ hay mạnh
+            this.restitution = restitution; // Độ nảy (0 = như bao cát, 1 = nảy hoàn hảo)
+            this.isColliding = false;       // Trạng thái va chạm để đổi màu khi vẽ
+        }
+    }
+
+    class Circle extends GameObject
+    {
+        constructor (context, x, y, vx, vy, radius, mass, restitution) {
+            super(context, x, y, vx, vy, radius, mass, restitution);
+
+            // Set default width and height
+            this.width = 50;
+            this.height = 50;
+        }
+
+        draw(){
+            this.context.fillStyle = this.isColliding?'#ff8080':'#0099b0';
+            this.context.beginPath();
+            this.context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            this.context.fill();
+        }
+
+        update(secondsPassed){
+            // Move with set velocity
+            this.x += this.vx * secondsPassed;
+            this.y += this.vy * secondsPassed;
+        }
+    }
+
+    function gameLoop(timeStamp) {
+        let secondsPassed = (timeStamp - oldTimeStamp) / 1000;
+        oldTimeStamp = timeStamp;
+        secondsPassed = Math.min(secondsPassed, 0.1);  //giới hạn delta time tránh skip lớn khi đổi tab
+
+        // Loop over all game objects
+        for (let i = 0; i < gameObjects.length; i++) {
+            gameObjects[i].update(secondsPassed);
+        }
+
+        // Xử lý va chạm giữa các objects và bo viền tường
+        detectCollisions();
+        detectEdgeCollisions();
+
+        // clear canvas
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // vẽ tất cả objects
+        for (let i = 0; i < gameObjects.length; i++) {
+            gameObjects[i].draw();
+        }
+
+        window.requestAnimationFrame(gameLoop);
+    }
+
+    // KIỂM TRA VA CHẠM  & PHẢN XẠ VẬT LÝ
+    function detectCollisions() {
+
+        for (let i = 0; i < gameObjects.length; i++) {
+            gameObjects[i].isColliding = false;
+        }
+
+        for (let i = 0; i < gameObjects.length; i++) {
+
+            let obj1 = gameObjects[i];
+
+            for (let j = i + 1; j < gameObjects.length; j++) {
+
+                let obj2 = gameObjects[j];
+
+                if (circleIntersect(obj1.x, obj1.y, obj1.radius, obj2.x, obj2.y, obj2.radius)) {
+
+                    obj1.isColliding = true;
+                    obj2.isColliding = true;
+
+                    // Vector nối tâm 2 điểm A B
+                    let vCollision = {x: obj2.x - obj1.x, y: obj2.y - obj1.y};
+
+                    // Khoảng cách vector AB
+                    let distance = Math.sqrt(vCollision.x * vCollision.x + vCollision.y * vCollision.y);
+
+                    // tránh chia cho 0
+                    if (distance === 0) {continue;}
+
+                    // Collision normal, chuẩn hóa vector AB để có độ dài bằng 1, chỉ giữ hướng va chạm
+                    let vCollisionNorm = {x: vCollision.x / distance, y: vCollision.y / distance};
+
+                    // Relative velocity(Vận tốc tương đối): A tiến về B nhanh hơn hay chậm hơn
+                    let vRelativeVelocity = {x: obj1.vx - obj2.vx, y: obj1.vy - obj2.vy};
+
+                    // Tốc độ va chạm: tích vô hướng giữa vận tốc tương đối và vector va chạm chuẩn
+                    // a*b=∣a∣*∣b∣*cosθ
+                    let speed = vRelativeVelocity.x * vCollisionNorm.x + vRelativeVelocity.y * vCollisionNorm.y;
+
+                    // Đang tách xa nhau, speed > 0 là tiến lại gần nhau, speed < 0 là tách xa nhau
+                    if (speed <= 0) {continue;}
+
+                    // Impulse: xung lượng = độ thay đổi động lượng
+                    //J=Δp , p=mv
+                    let impulse = 2 * speed / (obj1.mass + obj2.mass);
+
+                    // Cập nhật velocity (cập nhật vận tốc)
+                    obj1.vx -= impulse * obj2.mass * vCollisionNorm.x;
+                    obj1.vy -= impulse * obj2.mass * vCollisionNorm.y;
+
+                    obj2.vx += impulse * obj1.mass * vCollisionNorm.x;
+                    obj2.vy += impulse * obj1.mass * vCollisionNorm.y;
+                }
+            }
+        }
+    }
+
+    function rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {
+        // Check x and y for overlap
+        if (x2 > w1 + x1 || x1 > w2 + x2 || y2 > h1 + y1 || y1 > h2 + y2){
+            return false;
+        }
+        return true;
+    }
+
+    function circleIntersect(x1, y1, r1, x2, y2, r2) {
+
+        // Calculate the distance between the two circles
+        let squareDistance = (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2);
+
+        // When the distance is smaller or equal to the sum
+        // of the two radius, the circles touch or overlap
+        return squareDistance <= ((r1 + r2) * (r1 + r2))
+    }
+
+
+    // VA CHẠM VỚI BỐN BỨC TƯỜNG CANVAS
+    function detectEdgeCollisions() {
+        let obj;
+        for (let i = 0; i < gameObjects.length; i++) {
+            obj = gameObjects[i];
+
+            // Tường trái và phải
+            if (obj.x < obj.radius) {
+                obj.vx = Math.abs(obj.vx) * obj.restitution;
+                obj.x = obj.radius; // Đẩy vật ngược lại không cho lún vào tường
+            } else if (obj.x > canvas.width - obj.radius) {
+                obj.vx = -Math.abs(obj.vx) * obj.restitution;
+                obj.x = canvas.width - obj.radius;
+            }
+
+            // Tường trên và dưới sàn
+            if (obj.y < obj.radius) {
+                obj.vy = Math.abs(obj.vy) * obj.restitution;
+                obj.y = obj.radius;
+            } else if (obj.y > canvas.height - obj.radius) {
+                obj.vy = -Math.abs(obj.vy) * obj.restitution;
+                obj.y = canvas.height - obj.radius;
+            }
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Setup Test</title>
+</head>
+<body>
+    <canvas id="canvas" width="750" height="400" style="border:1px solid lightgrey;"></canvas>
+
+    <script>
+        "use strict";
+        let canvas;
+        let context;
+
+        window.onload = init;
+
+        function init() {
+            canvas = document.getElementById('canvas');
+            context = canvas.getContext('2d');
+
+            window.requestAnimationFrame(gameLoop);
+        }
+
+        let rectX = 0;
+        let rectY = 0;
+        let secondsPassed = 0; // aka delta time
+        let oldTimeStamp = 0;
+        let movingSpeed = 50;
+        let timePassed = 0;
+
+        // timestamp là thời gian đã trôi qua kể từ khi trang được tải, tính bằng milliseconds, được cung cấp bởi requestAnimationFrame
+        function gameLoop(timeStamp) {
+            secondsPassed = (timeStamp - oldTimeStamp) / 1000; // chuyển đổi từ milliseconds sang seconds
+            secondsPassed = Math.min(secondsPassed, 0.1); // giới hạn delta time để tránh các bước nhảy lớn khi tab bị treo hoặc chuyển đổi tab
+            oldTimeStamp = timeStamp;
+
+            // Pass the time to the update
+            update(secondsPassed);
+            draw();
+
+            window.requestAnimationFrame(gameLoop);
+        }
+
+        function draw() {
+            context.clearRect(0, 0, canvas.width, canvas.height);//clear canvas trước khi vẽ lại
+
+            context.fillStyle = '#ff8080';
+            context.fillRect(rectX, rectY, 150, 100); //x y thay đổi theo thời gian
+        }
+
+        // function update(secondsPassed) {
+        //
+        //     //50px/s ở màn 60fps sẽ là 50/60 px mỗi frame
+        //     rectX += (movingSpeed * secondsPassed);
+        //     rectY += (movingSpeed * secondsPassed);
+        // }
+
+
+        // Sử dụng easing functions để tạo hiệu ứng chuyển động mượt mà hơn
+        function update(secondsPassed) {
+
+            timePassed += secondsPassed
+
+            // Use different easing functions for different effects.
+            rectX = easeInOutQuint(timePassed, 50, 500, 1.5);
+            rectY = easeLinear(timePassed, 50, 250, 1.5);
+        }
+
+        // Example easing functions
+        // t: current time,
+        // b: start value,
+        // c: change in value,
+        // d: duration (tổng thời gian)
+
+        // bắt đầu chậm, tăng tốc dần, sau đó giảm tốc về cuối
+        function easeInOutQuint (t, b, c, d) {
+            // t /= d / 2: chuẩn hóa thời gian t để nó nằm trong khoảng từ 0 đến 2, nếu t < 1 thì đang ở nửa đầu của chuyển động
+            if ((t /= d / 2) < 1)
+                // nửa đầu: c/2 * t^5 + b  (c/2 vì là nửa đầu quãng đường)
+                //t^5=0.2^5=0.00032 rất nhỏ (mũ càng lớn thì khởi đầu càng chậm)
+                //c = 500 thì c/2 * t^5 = 500/2 * 0.00032 = 0.08, cộng với b = 50 thì rectX sẽ là 50.08
+                //=> rất gần với vị trí ban đầu
+                return c / 2 * t * t * t * t * t + b;
+
+            // nửa sau: c/2*((t-2)^5+2)+b
+            //lúc này t nằm trong khoảng [1,2]. t-2 sẽ nằm trong khoảng [-1,0]. lí do -2: Đưa về vùng tiệm cận 0 để lấy hiệu ứng giảm tốc.
+            // 2-2 = 0. 0^5 =0 thì đây là điểm đích
+            //t-2 = 1.5 - 2 = -0.5, (-0.5)^5 = -0.03125
+            //(t-2)^5 + 2 = -0.03125 + 2 = 1.96875
+            //(t-2)^5: t càng tăng lên thì giá trị này càng gần 0, tạo hiệu ứng giảm tốc
+            return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
+        }
+
+        //đi thẳng với tốc độ không đổi, không có gia tốc hay giảm tốc
+        function easeLinear (t, b, c, d) {
+            // thời gian hoàn thành phần trăm t / d (0.75 / 1.5 = 0.5 50%)
+            // nhân với quãng đường c * t / d (500 * 0.5 = 250)
+            // cộng với vị trí ban đầu b (50 + 250 = 300)
+            return c * t / d + b;
+        }
+    </script>
+</body>
+</html>
