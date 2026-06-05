@@ -59,7 +59,11 @@
         circleY = easeLinear(t, 50, 250, duration);
     }
 
-
+    // Example easing functions
+    // t: current time,
+    // b: start value,
+    // c: change in value,
+    // d: duration (tổng thời gian)
     function easeInQuart (t, b, c, d) {
         t /= d;
         return c * t * t * t * t + b;

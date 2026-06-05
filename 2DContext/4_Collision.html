@@ -137,7 +137,7 @@
                     // Relative velocity(Vận tốc tương đối): A tiến về B nhanh hơn hay chậm hơn
                     let vRelativeVelocity = {x: obj1.vx - obj2.vx, y: obj1.vy - obj2.vy};
 
-                    // Tốc độ va chạm: tích vô hướng giữa vận tốc tương đối và vector va chạm chuẩn
+                    // Tốc độ va chạm: tích vô hướng giữa vận tốc tương đối và vector va chạm
                     // a*b=∣a∣*∣b∣*cosθ
                     let speed = vRelativeVelocity.x * vCollisionNorm.x + vRelativeVelocity.y * vCollisionNorm.y;
 
@@ -169,7 +169,7 @@
 
     function circleIntersect(x1, y1, r1, x2, y2, r2) {
 
-        // Calculate the distance between the two circles
+        //Tính bình phương khoảng cách giữa 2 tâm (không ^2 nên tí so sánh với r1 + r2 ^2)
         let squareDistance = (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2);
 
         // When the distance is smaller or equal to the sum
