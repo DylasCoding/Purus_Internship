@@ -24,12 +24,12 @@
         context = canvas.getContext('2d');
 
         gameObjects = [
-            new Circle(context, 250, 50, 0, 50, 50, 5, 0.8),
-            new Circle(context, 250, 300, 0, -50, 50, 5, 0.8),
-            new Circle(context, 150, 0, 50, 50, 25, 1, 0.8),
-            new Circle(context, 250, 150, 50, 50, 25, 1, 0.8),
-            new Circle(context, 350, 75, -50, 50, 25, 1, 0.8),
-            new Circle(context, 300, 300, 50, -50, 25, 1, 0.8),
+            new Circle(context, 0, 50, 100, 400, 25, 5, 0.8),
+            new Circle(context, 50, 300, 100, 400, 25, 5, 0.8),
+            new Circle(context, 150, 0, 100, 400, 25, 3, 0.8),
+            new Circle(context, 250, 150, 100, 400, 25, 3, 0.8),
+            new Circle(context, 350, 75, 100, 400, 25, 3, 0.8),
+            new Circle(context, 300, 300, 100, 400, 25, 3, 0.8),
         ];
 
         window.requestAnimationFrame(gameLoop);
@@ -67,7 +67,10 @@
         }
 
         update(secondsPassed){
-            // Move with set velocity
+            const g = 9.81;
+
+            this.vy += g * secondsPassed; // v = v0 + at, a = g, t = delta time
+
             this.x += this.vx * secondsPassed;
             this.y += this.vy * secondsPassed;
         }
@@ -137,6 +140,9 @@
                     // a*b=∣a∣*∣b∣*cosθ
                     let speed = vRelativeVelocity.x * vCollisionNorm.x + vRelativeVelocity.y * vCollisionNorm.y;
 
+                    // Apply restitution to the speed
+                    speed *= Math.min(obj1.restitution, obj2.restitution);
+
                     // Đang tách xa nhau, speed > 0 là tiến lại gần nhau, speed < 0 là tách xa nhau
                     if (speed <= 0) {continue;}
 
@@ -156,7 +162,6 @@
     }
 
     function rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {
-        // Check x and y for overlap
         if (x2 > w1 + x1 || x1 > w2 + x2 || y2 > h1 + y1 || y1 > h2 + y2){
             return false;
         }
@@ -165,11 +170,9 @@
 
     function circleIntersect(x1, y1, r1, x2, y2, r2) {
 
-        //Tính bình phương khoảng cách giữa 2 tâm (không ^2 nên tí so sánh với r1 + r2 ^2)
+        //Tính bình phương khoảng cách giữa 2 tâm (không ^2 nên tí so sánh với (r1 + r2)^2)
         let squareDistance = (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2);
 
-        // When the distance is smaller or equal to the sum
-        // of the two radius, the circles touch or overlap
         return squareDistance <= ((r1 + r2) * (r1 + r2))
     }
 
