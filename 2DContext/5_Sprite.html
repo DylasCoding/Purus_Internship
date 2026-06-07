@@ -1,0 +1,105 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Setup Test</title>
+</head>
+<body>
+<canvas id="canvas" width="1500" height="400" style="border:1px solid lightgrey;">
+    Your browser does not support the HTML5 canvas tag.
+</canvas>
+
+<script>
+    "use strict";
+
+    let canvas;
+    let context;
+
+    const img = new Image();
+    const img2 = new Image();
+
+    let loaded = 0;
+
+    let numColumns = 5;
+    let numRows = 2;
+
+    let frameWidth = 0;
+    let frameHeight = 0;
+
+    let currentFrame = 0;
+
+    let column = 0;
+    let row = 0;
+
+    window.onload = init;
+
+    function init() {
+        canvas = document.getElementById("canvas");
+        context = canvas.getContext("2d");
+
+        img.onload = imageLoaded;
+        img2.onload = imageLoaded;
+
+        img.src = "/2DContext/assets/img.png";
+        img2.src = "/2DContext/assets/img_1.png";
+    }
+
+    function imageLoaded() {
+        loaded++;
+
+        if (loaded === 2) {
+            frameWidth = img2.width / numColumns;
+            frameHeight = img2.height / numRows;
+
+            requestAnimationFrame(gameLoop);
+        }
+    }
+
+    function gameLoop(timeStamp) {
+        draw();
+        window.requestAnimationFrame(gameLoop);
+    }
+
+    setInterval(function()
+    {
+        currentFrame++;
+
+        // frames loop
+        let maxFrame = numColumns * numRows - 1;
+        if (currentFrame > maxFrame){
+            currentFrame = 0;
+        }
+
+        column = currentFrame % numColumns;
+        row = Math.floor(currentFrame / numColumns);
+
+        //đợi 100ms sau đó thực hiện hàm bên trong
+    }, 100);
+
+    function draw() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Vẽ cùng một ảnh nhiều lần
+        context.drawImage(img, 10, 30);
+        context.drawImage(img, 250, 10, img.width / 2, img.height / 2);
+        context.drawImage(img, 390, 10, 100, 200);
+
+        //quality img
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = 'high';
+        context.drawImage(img, 400, 30, img.width * 3, img.height * 3);
+
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = 'low';
+        context.drawImage(img, 600, 30, img.width * 3, img.height * 3);
+
+        context.drawImage(img, 800, 30, img.width * 3, img.height * 3);
+
+        // Vẽ một phần của ảnh
+        context.drawImage(img, 100, 0, 200, 50, 10, 300, 200, 50); //img,sx,sy,swidth,sheight,x,y,width,height
+
+        context.drawImage(img2, column*frameWidth, row*frameHeight, frameWidth, frameHeight, 150, 300, frameWidth, frameHeight);
+    }
+</script>
+</body>
+</html>
