@@ -1,6 +1,7 @@
-import Bubble from './Bubble.js';
+import Bubble from './bubble.js';
 
-const COLORS = ['blue', 'green', 'orange', 'red', 'yellow'];
+import {COLORS} from "./grid.js";
+// const COLORS = ['blue', 'green', 'orange', 'red', 'yellow'];
 
 export default class Shooter {
     constructor(x, y) {
@@ -51,8 +52,8 @@ export default class Shooter {
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
 
-        ctx.fillStyle = '#e3bcbc';
-        ctx.fillRect(0, -10, 60, 20);
+        // ctx.fillStyle = '#e3bcbc';
+        // ctx.fillRect(0, -10, 60, 20);
         ctx.restore();
 
         this.drawTrajectory(ctx);

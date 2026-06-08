@@ -3,25 +3,9 @@ export default class Bubble {
     static sprites = {}; // Object chứa các ảnh theo tên màu
     static numCols = 10;
     static numRows = 7;
-    static totalFrames = 70; // 7 x 10
+    static totalFrames = 70; // 7 hàng x 10 cột
     static frameWidth = 0;
     static frameHeight = 0;
-
-    static loadSprites(imageUrls) {
-        for (let color in imageUrls) {
-            let img = new Image();
-            img.src = imageUrls[color];
-            Bubble.sprites[color] = img;
-
-            // Lấy kích thước khung hình khi ảnh đầu tiên tải xong
-            img.onload = () => {
-                if (Bubble.frameWidth === 0) {
-                    Bubble.frameWidth = img.width / Bubble.numCols;
-                    Bubble.frameHeight = img.height / Bubble.numRows;
-                }
-            };
-        }
-    }
 
     constructor(x, y, colorName) {
         this.x = x;
@@ -40,26 +24,7 @@ export default class Bubble {
         this.frameTimer = 0;
 
         // Tốc độ chạy (70 frames thì có thể để chạy nhanh một chút, vd: 30 FPS = 1/30s)
-        this.frameInterval = 1 / 30;
-    }
-
-    update(dt) {
-        if (this.isMoving) {
-            this.x += this.vx * dt;
-            this.y += this.vy * dt;
-        }
-
-        // Cập nhật Animation
-        this.frameTimer += dt;
-        if (this.frameTimer >= this.frameInterval) {
-            this.frameTimer = 0;
-            this.currentFrame++;
-
-            // Khi chạy tới frame 69, quay lại frame 0
-            if (this.currentFrame >= Bubble.totalFrames) {
-                this.currentFrame = 0;
-            }
-        }
+        this.frameInterval = 1 / 25;
     }
 
     draw(ctx) {
@@ -81,4 +46,40 @@ export default class Bubble {
             size, size
         );
     }
+
+    update(dt) {
+        if (this.isMoving) {
+            this.x += this.vx * dt;
+            this.y += this.vy * dt;
+        }
+
+        // Cập nhật Animation
+        this.frameTimer += dt;
+        if (this.frameTimer >= this.frameInterval) {
+            this.frameTimer = 0;
+            this.currentFrame++;
+
+            // Khi chạy tới frame 69, quay lại frame 0
+            if (this.currentFrame >= Bubble.totalFrames) {
+                this.currentFrame = 0;
+            }
+        }
+    }
+
+    static loadSprites(imageUrls) {
+        for (let color in imageUrls) {
+            let img = new Image();
+            img.src = imageUrls[color];
+            Bubble.sprites[color] = img;
+
+            // Lấy kích thước khung hình khi ảnh đầu tiên tải xong
+            img.onload = () => {
+                if (Bubble.frameWidth === 0) {
+                    Bubble.frameWidth = img.width / Bubble.numCols;
+                    Bubble.frameHeight = img.height / Bubble.numRows;
+                }
+            };
+        }
+    }
+
 }

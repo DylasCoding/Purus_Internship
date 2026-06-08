@@ -1,7 +1,8 @@
-import Grid from './Grid.js';
-import Shooter from './Shooter.js';
-import { circleIntersect, handleWallBounce } from './Physics.js';
-import Bubble from './Bubble.js';
+import Grid from './grid.js';
+import Shooter from './shooter.js';
+import { circleIntersect, handleWallBounce } from './physics.js';
+import Bubble from './bubble.js';
+import GameUI from './game_ui.js';
 
 let canvas, ctx;
 const BUBBLE_RADIUS = 20;
@@ -14,14 +15,23 @@ let movingBubble = null;
 let fallingBubbles = []; // Thêm mảng chứa bóng đang rơi
 let lastTime = 0;
 
+let gameState = 'PLAYING'; // 'PLAYING' hoặc 'GAMEOVER'
+let shotsFired = 0;
+const SHOTS_TO_DROP = 5; // 5 lầnn bắn -> đẩy xuống 1 hàng
+let safeLineY;                     // bóng chajm thiof game over
+let ui;
+
 function init() {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
 
-    // Lấy kích thước chuẩn ban đầu
+    // Khởi tạo giao diện UI
+    ui = new GameUI(canvas);
+
     let rect = canvas.getBoundingClientRect();
     gameWidth = rect.width;
     gameHeight = rect.height;
+    safeLineY = gameHeight - 100; // Vạch tử thần nằm ngay trên nòng súng
 
     // Xử lý chống mờ cho Retina
     let dpr = window.devicePixelRatio || 1;
@@ -42,30 +52,35 @@ function init() {
         yellow: './assets/yellow.png'
     });
 
-    // SỬA: Dùng gameWidth thay cho canvas.width
     const GRID_COLS = Math.floor(gameWidth / (BUBBLE_RADIUS * 2));
     const GRID_ROWS = 14;
 
     grid = new Grid(GRID_COLS, GRID_ROWS, BUBBLE_RADIUS);
     grid.initLevel(5);
 
-    // SỬA: Dùng gameWidth, gameHeight thay cho canvas
     shooter = new Shooter(gameWidth / 2, gameHeight - 30);
 
+    ui.updateGameInfo(score, SHOTS_TO_DROP);
+
     canvas.addEventListener('mousemove', (e) => {
+        if (gameState !== 'PLAYING') return;
+
         let currentRect = canvas.getBoundingClientRect();
         let scaleX = gameWidth / currentRect.width;
         let scaleY = gameHeight / currentRect.height;
-
-        shooter.aim(
-            (e.clientX - currentRect.left) * scaleX,
-            (e.clientY - currentRect.top) * scaleY
-        );
+        shooter.aim((e.clientX - currentRect.left) * scaleX, (e.clientY - currentRect.top) * scaleY);
     });
 
     canvas.addEventListener('mousedown', () => {
+        if (gameState !== 'PLAYING') return;
+
         if (!movingBubble) {
             movingBubble = shooter.fire();
+            shotsFired++;
+
+            // Cập nhật số lần bắn còn lại lên HUD (tạm dùng chữ Speed trong code của bạn)
+            let shotsLeft = SHOTS_TO_DROP - (shotsFired % SHOTS_TO_DROP);
+            ui.updateGameInfo(score, shotsLeft);
         }
     });
 
@@ -85,6 +100,7 @@ function gameLoop(timestamp) {
 }
 
 function update(dt) {
+    if (gameState !== 'PLAYING') return;
 
     grid.update(dt);
     shooter.update(dt);
@@ -99,20 +115,6 @@ function update(dt) {
         b.y += b.vy * dt;
 
         if (b.y > gameHeight + b.radius) {
-            fallingBubbles.splice(i, 1);
-        }
-    }
-
-    // Cập nhật các quả bóng đang rơi tự do
-    for (let i = fallingBubbles.length - 1; i >= 0; i--) {
-        let b = fallingBubbles[i];
-        b.vy += 1500 * dt; // Áp dụng trọng lực g
-
-        b.x += b.vx * dt;
-        b.y += b.vy * dt;
-
-        // Xoá bóng rác khỏi RAM khi đã rớt khỏi màn hình
-        if (b.y > canvas.height + b.radius) {
             fallingBubbles.splice(i, 1);
         }
     }
@@ -148,7 +150,6 @@ function update(dt) {
         if (hasCollided) {
             movingBubble.isMoving = false;
 
-            // Nhận kết quả là object từ Grid.js
             let result = grid.snapBubble(movingBubble);
 
             // tính điểm 1đ cho bóng nổ, 2đ cho bóng rớt
@@ -163,6 +164,20 @@ function update(dt) {
 
             movingBubble = null;
             shooter.loadBubble();
+
+            // kiểm tra ần bắn
+            if (shotsFired % SHOTS_TO_DROP === 0) {
+                grid.pushDown();
+            }
+
+            let shotsLeft = SHOTS_TO_DROP - (shotsFired % SHOTS_TO_DROP);
+            ui.updateGameInfo(score, shotsLeft);
+
+            if (checkGameOver()) {
+                gameState = 'GAMEOVER';
+                ui.showMessage("GAME OVER");
+                ui.showButton("Restart", restartGame);
+            }
         }
     }
 }
@@ -184,11 +199,47 @@ function draw() {
         b.draw(ctx);
     }
 
-    ctx.fillStyle = '#000000';
-    ctx.font = 'bold 14px Arial';
-    ctx.textAlign = 'left';
+    // Vẽ vạch an toàn
+    ctx.beginPath();
+    ctx.moveTo(0, safeLineY);
+    ctx.lineTo(gameWidth, safeLineY);
+    ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+    ctx.setLineDash([10, 5]); // Nét đứt
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.setLineDash([]); // Reset nét vẽ
+}
 
-    ctx.fillText(`point: ${score}`, 20, gameHeight - 20);
+// Hàm kiểm tra xem có bóng nào chạm vạch an toàn chưa
+function checkGameOver() {
+    for (let r = 0; r < grid.rows; r++) {
+        for (let c = 0; c < grid.cols; c++) {
+            let b = grid.cells[r][c];
+            // Nếu toạ độ Y của đáy bóng vượt qua vạch tử thần
+            if (b && (b.y + b.radius >= safeLineY)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function restartGame() {
+    score = 0;
+    shotsFired = 0;
+    fallingBubbles = [];
+    movingBubble = null;
+    gameState = 'PLAYING';
+
+    grid.startY = grid.radius;
+    grid.firstRowOffset = 0;
+    grid.cells = Array(grid.rows).fill(null).map(() => Array(grid.cols).fill(null));
+    grid.initLevel(5);
+
+    shooter.loadBubble();
+
+    ui.hideMessage();
+    ui.updateGameInfo(score, SHOTS_TO_DROP);
 }
 
 window.onload = init;
