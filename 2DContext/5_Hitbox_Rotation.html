@@ -23,12 +23,14 @@
         context = canvas.getContext('2d');
 
         gameObjects = [
-            new Circle(context, 100, 50, 100, 200, 25, 5, 0.8),
-            new Circle(context, 200, 100, -120, 150, 25, 5, 0.8),
-            new Circle(context, 350, 80, 80, 100, 25, 3, 0.8),
-            new Circle(context, 450, 150, -90, 250, 25, 3, 0.8),
-            new Circle(context, 550, 75, 140, 50, 25, 3, 0.8),
-            new Circle(context, 600, 200, -60, 180, 25, 3, 0.8),
+            new Circle(context, 100, 50, 200, 400, 25, 5, 0.8),
+            new Circle(context, 200, 100, -220, 250, 25, 5, 0.8),
+            new Circle(context, 350, 80, 180, 200, 25, 3, 0.8),
+            new Circle(context, 450, 150, -190, 250, 25, 3, 0.8),
+            new Circle(context, 550, 75, 240, 250, 25, 3, 0.8),
+            new Circle(context, 600, 200, -160, 280, 25, 3, 0.8),
+            new Circle(context, 700, 50, 200, 300, 25, 3, 0.8),
+            new Circle(context, 150, 200, -200, 300, 25, 3, 0.8),
         ];
 
         window.requestAnimationFrame(gameLoop);
@@ -90,27 +92,30 @@
             this.x += this.vx * secondsPassed;
             this.y += this.vy * secondsPassed;
 
-            let radians = Math.atan2(this.vy, this.vx);
+            let radians = Math.atan2(this.vy, this.vx); // Góc giữa vector vận tốc và trục x ,tính bằng radian
             this.angle = 180 * radians / Math.PI;
         }
 
         draw() {
-            if (!Circle.sprite || Circle.frameWidth === 0) {
-                this.context.fillStyle = this.isColliding ? '#ff8080' : '#0099b0';
-                this.context.beginPath();
-                this.context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                this.context.fill();
-                return;
-            }
+            // if (!Circle.sprite || Circle.frameWidth === 0) {
+            //     this.context.fillStyle = this.isColliding ? '#ff8080' : '#0099b0';
+            //     this.context.beginPath();
+            //     this.context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            //     this.context.fill();
+            //     return;
+            // }
 
             let column = this.currentFrame % Circle.numColumns;
             let row = Math.floor(this.currentFrame / Circle.numColumns);
 
+            // đặt gốc xoay tại tâm của hình tròn, sau đó xoay và vẽ sprite
             this.context.translate(this.x, this.y);
+            // đổi radian sang độ
+            // góc + 90 vì ảnh gốc thường hướng đầu lên trên, trong khi toán học mặc định hướng sang phải
             this.context.rotate(Math.PI / 180 * (this.angle + 90));
-            this.context.translate(-this.x, -this.y);
+            this.context.translate(-this.x, -this.y); //dời gốc tọa độ ngược trở lại vị trí cũ để chuẩn bị vẽ đối tượng khác
 
-            this.context.drawImage(
+            this.context.drawImage(  // vẽ sprite với góc xoay
                 Circle.sprite,
                 column * Circle.frameWidth,
                 row * Circle.frameHeight,
@@ -122,12 +127,13 @@
                 this.radius * 2.42
             );
 
+            //bức ảnh xoay thì canvas cũng xôay -> phải reset lại transform để vẽ các đối tượng khác không bị xoay theo
             this.context.setTransform(1, 0, 0, 1, 0, 0);
 
             // Viền Hitbox
             this.context.beginPath();
             this.context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            this.context.strokeStyle = this.isColliding ? 'red' : 'rgba(0, 0, 0, 0.2)';
+            this.context.strokeStyle = this.isColliding ? 'red' : 'rgb(255,0,0)';
             this.context.lineWidth = 2;
             this.context.stroke();
         }
@@ -216,10 +222,10 @@
                 obj.handleCollision();
             }
 
-            if (obj.y < obj.radius) {
+            if (obj.y < obj.radius) { // Đổi màu khi đập trần nhà
                 obj.vy = Math.abs(obj.vy) * obj.restitution;
                 obj.y = obj.radius;
-                obj.handleCollision(); // Đổi màu khi đập trần nhà
+                obj.handleCollision();
             } else if (obj.y > canvas.height - obj.radius) {
                 obj.vy = -Math.abs(obj.vy) * obj.restitution;
                 obj.y = canvas.height - obj.radius;
