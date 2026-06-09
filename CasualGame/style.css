@@ -11,10 +11,11 @@ body {
 
 body {
     font-family: Arial, sans-serif;
+    /* Đổi sang nền xám nhạt/trắng sáng với hiệu ứng gradient màu pastel */
     background:
-        radial-gradient(circle at top left, rgba(45, 212, 191, 0.28), transparent 32%),
-        radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.2), transparent 34%),
-        #111827;
+            radial-gradient(circle at top left, rgba(45, 212, 191, 0.15), transparent 32%),
+            radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.12), transparent 34%),
+            #f8fafc;
 }
 
 .game-page {
@@ -35,12 +36,11 @@ canvas {
     width: 100%;
     height: auto;
     aspect-ratio: 900 / 620;
-    border: 2px solid rgba(255, 255, 255, 0.24);
+    border: 2px solid rgba(0, 0, 0, 0.08);
     border-radius: 8px;
-    background: #0f172a;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+    background: #ffffff;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
 }
-
 .game-hud {
     display: flex;
     align-items: center;
@@ -68,16 +68,17 @@ canvas {
     position: absolute;
     left: 50%;
     top: calc((100% - 58px) / 2);
-    width: min(64%, 560px);
+    width: min(64%, 480px);
     min-height: 160px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 24px;
-    border: 2px solid rgba(125, 211, 252, 0.65);
+    border: 2px solid rgba(14, 165, 233, 0.4);
     border-radius: 8px;
-    background: rgba(15, 23, 42, 0.86);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
     transform: translate(-50%, -50%);
 }
 
@@ -92,15 +93,16 @@ canvas {
     height: 44px;
     border: 0;
     border-radius: 8px;
-    background: #38bdf8;
-    color: #0f172a;
+    background: #0ea5e9;
+    color: #ffffff;
     cursor: pointer;
     font: bold 18px Arial, sans-serif;
-    box-shadow: 0 10px 24px rgba(56, 189, 248, 0.35);
+    box-shadow: 0 8px 20px rgba(14, 165, 233, 0.25);
+    transition: all 0.2s ease;
 }
 
 .game-button:hover {
-    background: #7dd3fc;
+    background: #38bdf8;
 }
 
 .game-button:active {

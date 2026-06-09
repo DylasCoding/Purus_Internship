@@ -1,7 +1,5 @@
 import Bubble from './bubble.js';
-
 import {COLORS} from "./grid.js";
-// const COLORS = ['blue', 'green', 'orange', 'red', 'yellow'];
 
 export default class Shooter {
     constructor(x, y) {
@@ -11,18 +9,31 @@ export default class Shooter {
         this.loadedBubble = null;
         this.speed = 800; // Tốc độ bay của bóng (pixel/giây)
 
+        // Khởi tạo màu cho bóng tiếp theo
+        this.nextBubbleColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+
+        // Tạo một bóng preview đặt ở bên trái nòng súng
+        this.nextBubblePreview = new Bubble(this.x - 70, this.y + 10, this.nextBubbleColor);
+        this.nextBubblePreview.radius = 15; // Thu nhỏ bóng preview một chút
+
         this.loadBubble();
     }
 
     loadBubble() {
-        let randomColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-        // Đặt bóng ở ngay nòng súng
-        this.loadedBubble = new Bubble(this.x, this.y, randomColor);
+        // Lấy màu từ hàng chờ nạp vào nòng
+        this.loadedBubble = new Bubble(this.x, this.y, this.nextBubbleColor);
+
+        // Sinh màu ngẫu nhiên mới cho lượt kế tiếp
+        this.nextBubbleColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+        this.nextBubblePreview.color = this.nextBubbleColor;
     }
 
     update(dt) {
         if (this.loadedBubble) {
             this.loadedBubble.update(dt);
+        }
+        if (this.nextBubblePreview) {
+            this.nextBubblePreview.update(dt);
         }
     }
 
@@ -51,12 +62,16 @@ export default class Shooter {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
-
         // ctx.fillStyle = '#e3bcbc';
         // ctx.fillRect(0, -10, 60, 20);
         ctx.restore();
 
         this.drawTrajectory(ctx);
+
+        // Vẽ bóng preview chuẩn bị cho lượt tới
+        if (this.nextBubblePreview) {
+            this.nextBubblePreview.draw(ctx);
+        }
 
         // Vẽ quả bóng đang nằm trong nòng súng
         if (this.loadedBubble) {

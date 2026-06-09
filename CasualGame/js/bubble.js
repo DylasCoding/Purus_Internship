@@ -1,5 +1,5 @@
 export default class Bubble {
-    // 1. Cấu hình Sprite Sheet
+    // Cấu hình Sprite Sheet
     static sprites = {}; // Object chứa các ảnh theo tên màu
     static numCols = 10;
     static numRows = 7;
@@ -12,7 +12,7 @@ export default class Bubble {
         this.y = y;
         this.radius = 20;
 
-        this.color = colorName; // 'blue', 'red'
+        this.color = colorName;
 
         this.vx = 0;
         this.vy = 0;
