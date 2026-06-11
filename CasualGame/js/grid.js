@@ -13,11 +13,9 @@ export default class Grid {
         this.startX = this.radius;
         this.startY = this.radius;
 
-        // Track the odd/even offset for the grid parity
         this.firstRowOffset = 0;
     }
 
-    // đảm bảo luôn có không gian trống ở dưới cùng
     ensureEmptyBottomRow() {
         while (this.cells[this.rows - 1].some(cell => cell !== null)) {
             this.rows++;
@@ -51,27 +49,22 @@ export default class Grid {
     }
 
     pushDown() {
-        // Tăng thêm 1 hàng để giữ lại các bóng đang nằm ở đáy lưới, tránh bị xóa mất
         this.rows++;
         this.cells.push(Array(this.cols).fill(null));
 
-        // Shift bubbles down without deleting the last column
         for (let r = this.rows - 1; r > 0; r--) {
             for (let c = 0; c < this.cols; c++) {
                 this.cells[r][c] = this.cells[r - 1][c];
             }
         }
 
-        // Toggle parity to maintain the correct honeycomb arrangement
         this.firstRowOffset = (this.firstRowOffset === 0) ? 1 : 0;
 
-        // Clear top row and generate new bubbles
         for (let c = 0; c < this.cols; c++) {
             this.cells[0][c] = null;
         }
         this.fillRow(0);
 
-        // Update physical coordinates
         for (let r = 0; r < this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
                 if (this.cells[r][c]) {

@@ -11,11 +11,10 @@ body {
 
 body {
     font-family: Arial, sans-serif;
-    /* Đổi sang nền xám nhạt/trắng sáng với hiệu ứng gradient màu pastel */
     background:
-            radial-gradient(circle at top left, rgba(45, 212, 191, 0.15), transparent 32%),
-            radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.12), transparent 34%),
-            #f8fafc;
+            radial-gradient(circle at top left, rgba(34, 197, 94, 0.15), transparent 30%),
+            radial-gradient(circle at bottom right, rgba(251, 191, 36, 0.15), transparent 30%),
+            #1f2937;
 }
 
 .game-page {
@@ -77,7 +76,7 @@ canvas {
     gap: 24px;
     border: 2px solid rgba(14, 165, 233, 0.4);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgb(53, 53, 53);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
     transform: translate(-50%, -50%);
 }

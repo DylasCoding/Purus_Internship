@@ -7,14 +7,14 @@ export default class Shooter {
         this.y = y;
         this.angle = -Math.PI / 2;
         this.loadedBubble = null;
-        this.speed = 800; // Tốc độ bay của bóng (pixel/giây)
+        this.speed = 800;
 
         // Khởi tạo màu cho bóng tiếp theo
         this.nextBubbleColor = COLORS[Math.floor(Math.random() * COLORS.length)];
 
         // Tạo một bóng preview đặt ở bên trái nòng súng
         this.nextBubblePreview = new Bubble(this.x - 70, this.y + 10, this.nextBubbleColor);
-        this.nextBubblePreview.radius = 15; // Thu nhỏ bóng preview một chút
+        this.nextBubblePreview.radius = 15;
 
         this.loadBubble();
     }
@@ -62,8 +62,6 @@ export default class Shooter {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
-        // ctx.fillStyle = '#e3bcbc';
-        // ctx.fillRect(0, -10, 60, 20);
         ctx.restore();
 
         this.drawTrajectory(ctx);
@@ -85,7 +83,7 @@ export default class Shooter {
         let endX = this.x + Math.cos(this.angle) * 300;
         let endY = this.y + Math.sin(this.angle) * 300;
         ctx.lineTo(endX, endY);
-        ctx.strokeStyle = 'rgba(103,1,1,0.5)';
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
         ctx.setLineDash([10, 10]);
         ctx.lineWidth = 2;
         ctx.stroke();

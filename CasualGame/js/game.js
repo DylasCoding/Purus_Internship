@@ -228,7 +228,7 @@ export default class Game {
     }
 
     draw() {
-        this.ctx.fillStyle = 'rgba(253,253,253,0.33)';
+        this.ctx.fillStyle = '#111827';
         this.ctx.fillRect(0, 0, this.gameWidth, this.gameHeight);
 
         this.grid.draw(this.ctx);
