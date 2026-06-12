@@ -1,4 +1,4 @@
-export default class GameUI {
+class GameUI {
     constructor(canvas) {
         this.stage = canvas.parentElement;
 

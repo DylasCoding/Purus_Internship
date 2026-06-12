@@ -1,10 +1,4 @@
-import Grid from './grid.js';
-import Shooter from './shooter.js';
-import { circleIntersect, handleWallBounce } from './physics.js';
-import Bubble from './bubble.js';
-import GameUI from './game_ui.js';
-
-export default class Game {
+class Game {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
@@ -74,14 +68,8 @@ export default class Game {
 
     handleMouseMove(e) {
         if (this.gameState !== 'PLAYING') return;
-
-        let currentRect = this.canvas.getBoundingClientRect();
-        let scaleX = this.gameWidth / currentRect.width;
-        let scaleY = this.gameHeight / currentRect.height;
-        this.shooter.aim(
-            (e.clientX - currentRect.left) * scaleX,
-            (e.clientY - currentRect.top) * scaleY
-        );
+        let coords = Input.getMouseCoordinates(e, this.canvas, this.gameWidth, this.gameHeight);
+        this.shooter.aim(coords.x, coords.y);
     }
 
     handleMouseDown() {
@@ -139,9 +127,7 @@ export default class Game {
         this.movingBubble.update(dt);
         handleWallBounce(this.movingBubble, this.gameWidth);
 
-        let hasCollided = this.checkCollisions();
-
-        if (hasCollided) {
+        if (this.checkCollisions()) {
             this.movingBubble.isMoving = false;
 
             let result = this.grid.snapBubble(this.movingBubble);
@@ -168,10 +154,8 @@ export default class Game {
         for (let r = 0; r < this.grid.rows; r++) {
             for (let c = 0; c < this.grid.cols; c++) {
                 let b = this.grid.cells[r][c];
-                if (b) {
-                    if (circleIntersect(b.x, b.y, b.radius, this.movingBubble.x, this.movingBubble.y, this.movingBubble.radius)) {
-                        return true;
-                    }
+                if (b && circleIntersect(b.x, b.y, b.radius, this.movingBubble.x, this.movingBubble.y, this.movingBubble.radius)) {
+                    return true;
                 }
             }
         }
@@ -257,3 +241,7 @@ export default class Game {
     }
 }
 
+window.onload = () => {
+    const game = new Game('canvas');
+    game.init();
+};

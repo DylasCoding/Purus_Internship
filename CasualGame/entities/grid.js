@@ -1,8 +1,6 @@
-import Bubble from './bubble.js';
+const COLORS = ['blue', 'green', 'orange', 'red', 'yellow'];
 
-export const COLORS = ['blue', 'green', 'orange', 'red', 'yellow'];
-
-export default class Grid {
+class Grid {
     constructor(cols, rows, bubbleRadius) {
         this.cols = cols;
         this.rows = rows;
@@ -12,7 +10,6 @@ export default class Grid {
         this.cells = Array(rows).fill(null).map(() => Array(cols).fill(null));
         this.startX = this.radius;
         this.startY = this.radius;
-
         this.firstRowOffset = 0;
     }
 
@@ -104,7 +101,6 @@ export default class Grid {
     }
 
     snapBubble(bubble) {
-        // Kiểm tra và cơi nới mảng nếu bóng đang dính vào sát mức hàng cuối cùng
         this.ensureEmptyBottomRow();
 
         let closestR = -1, closestC = -1, minDist = Infinity;
@@ -200,11 +196,7 @@ export default class Grid {
         for (let r = 0; r < this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
                 if (this.cells[r][c] && !connected.has(`${r},${c}`)) {
-                    let b = this.cells[r][c];
-                    b.vx = (Math.random() - 0.5) * 200;
-                    b.vy = 0;
-                    falling.push(b);
-
+                    falling.push(new Particle(this.cells[r][c]));
                     this.cells[r][c] = null;
                 }
             }

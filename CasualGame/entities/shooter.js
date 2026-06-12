@@ -1,7 +1,4 @@
-import Bubble from './bubble.js';
-import {COLORS} from "./grid.js";
-
-export default class Shooter {
+class Shooter {
     constructor(x, y) {
         this.x = x;
         this.y = y;
@@ -9,10 +6,7 @@ export default class Shooter {
         this.loadedBubble = null;
         this.speed = 800;
 
-        // Khởi tạo màu cho bóng tiếp theo
         this.nextBubbleColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-
-        // Tạo một bóng preview đặt ở bên trái nòng súng
         this.nextBubblePreview = new Bubble(this.x - 70, this.y + 10, this.nextBubbleColor);
         this.nextBubblePreview.radius = 15;
 
@@ -20,21 +14,14 @@ export default class Shooter {
     }
 
     loadBubble() {
-        // Lấy màu từ hàng chờ nạp vào nòng
         this.loadedBubble = new Bubble(this.x, this.y, this.nextBubbleColor);
-
-        // Sinh màu ngẫu nhiên mới cho lượt kế tiếp
         this.nextBubbleColor = COLORS[Math.floor(Math.random() * COLORS.length)];
         this.nextBubblePreview.color = this.nextBubbleColor;
     }
 
     update(dt) {
-        if (this.loadedBubble) {
-            this.loadedBubble.update(dt);
-        }
-        if (this.nextBubblePreview) {
-            this.nextBubblePreview.update(dt);
-        }
+        if (this.loadedBubble) this.loadedBubble.update(dt);
+        if (this.nextBubblePreview) this.nextBubblePreview.update(dt);
     }
 
     aim(mouseX, mouseY) {
@@ -49,13 +36,12 @@ export default class Shooter {
     fire() {
         if (!this.loadedBubble) return null;
 
-        let bubbleToFire = this.loadedBubble;
+        let bubbleToFire = new Projectile(this.loadedBubble.x, this.loadedBubble.y, this.loadedBubble.color);
         bubbleToFire.vx = Math.cos(this.angle) * this.speed;
         bubbleToFire.vy = Math.sin(this.angle) * this.speed;
-        bubbleToFire.isMoving = true;
 
-        this.loadedBubble = null; // Bắn xong thì rỗng nòng
-        return bubbleToFire;      // Trả về bóng để [main.js] quản lý
+        this.loadedBubble = null;
+        return bubbleToFire;
     }
 
     draw(ctx) {
@@ -66,15 +52,8 @@ export default class Shooter {
 
         this.drawTrajectory(ctx);
 
-        // Vẽ bóng preview chuẩn bị cho lượt tới
-        if (this.nextBubblePreview) {
-            this.nextBubblePreview.draw(ctx);
-        }
-
-        // Vẽ quả bóng đang nằm trong nòng súng
-        if (this.loadedBubble) {
-            this.loadedBubble.draw(ctx);
-        }
+        if (this.nextBubblePreview) this.nextBubblePreview.draw(ctx);
+        if (this.loadedBubble) this.loadedBubble.draw(ctx);
     }
 
     drawTrajectory(ctx) {
