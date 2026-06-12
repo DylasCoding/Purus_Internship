@@ -1,4 +1,4 @@
-// Differentiates fired moving bubbles from stationary grid objects
+// bóng bắn
 class Projectile extends Bubble {
     constructor(x, y, colorName) {
         super(x, y, colorName);
