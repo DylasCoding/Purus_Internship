@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>WebGL Triangle</title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 100vw; height: 100vh; display: block; }
+    </style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<script id="vertex-shader-2d" type="x-shader/x-vertex">
+
+    attribute vec4 a_position;
+    varying vec4 v_color; // Khai báo biến truyền đi
+
+    void main() {
+      gl_Position = a_position;
+
+      // ta lấy luôn tọa độ làm màu
+      v_color = a_position * 0.5 + 0.5;
+    }
+</script>
+
+<script id="fragment-shader-2d" type="x-shader/x-vertex">
+
+    precision mediump float;
+    varying vec4 v_color; // Khai báo giống vertex shader
+
+    void main() {
+      gl_FragColor = v_color;
+      //gl_FragColor = vec4(1, 0, 0.5, 1);
+    }
+
+</script>
+
+<script src="FirstTriangle.js"></script>
+</body>
+</html>

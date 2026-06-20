@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>WebGL Rectangle</title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 800px; height: 500px; display: block; }
+    </style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<script id="vertex-shader-2d" type="notjs">
+
+    attribute vec2 a_position;
+    uniform vec2 u_resolution; //canvas resolution
+
+    void main() {
+       // Chuyển từ pixel về đoạn từ 0.0 đến 1.0
+       vec2 zeroToOne = a_position / u_resolution;
+       // Chuyển tiếp từ 0->1 thành 0->2
+       vec2 zeroToTwo = zeroToOne * 2.0;
+       // Chuyển từ 0->2 thành -1->+1 (Clip Space)
+       vec2 clipSpace = zeroToTwo - 1.0;
+
+       // Lật ngược trục Y (nhân với -1) để đưa góc 0,0 từ "Dưới-Trái" lên "Trên-Trái"
+       gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+    }
+
+</script>
+
+<script id="fragment-shader-2d" type="notjs">
+
+    precision mediump float;
+
+    uniform vec4 u_color;
+
+    void main() {
+       gl_FragColor = u_color;
+    }
+
+</script>
+
+<script src="Rectangle.js"></script>
+</body>
+</html>

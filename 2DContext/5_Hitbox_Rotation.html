@@ -97,14 +97,6 @@
         }
 
         draw() {
-            // if (!Circle.sprite || Circle.frameWidth === 0) {
-            //     this.context.fillStyle = this.isColliding ? '#ff8080' : '#0099b0';
-            //     this.context.beginPath();
-            //     this.context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            //     this.context.fill();
-            //     return;
-            // }
-
             let column = this.currentFrame % Circle.numColumns;
             let row = Math.floor(this.currentFrame / Circle.numColumns);
 

@@ -4,8 +4,10 @@ class Grid {
     constructor(cols, rows, bubbleRadius) {
         this.cols = cols;
         this.rows = rows;
+
         this.radius = bubbleRadius;
         this.diameter = bubbleRadius * 2;
+
         this.rowHeight = this.radius * Math.sqrt(3);
         this.cells = Array(rows).fill(null).map(() => Array(cols).fill(null));
         this.startX = this.radius;
@@ -85,7 +87,7 @@ class Grid {
     getNeighbors(r, c) {
         const isOdd = (r + this.firstRowOffset) % 2 !== 0;
         const offsets = isOdd ?
-            [[0, -1], [0, 1], [-1, 0], [-1, 1], [1, 0], [1, 1]] :
+            [[0, -1], [0, 1], [-1, 0], [-1, 1], [1, 0], [1, 1]] : //lẻ
             [[0, -1], [0, 1], [-1, -1], [-1, 0], [1, -1], [1, 0]];
 
         let neighbors = [];
@@ -143,7 +145,6 @@ class Grid {
             for (let cell of matchGroup) {
                 this.cells[cell.r][cell.c] = null;
             }
-            droppedBubbles = this.dropFloatingBubbles();
         }
 
         return { dropped: droppedBubbles, popped: poppedCount };
@@ -160,7 +161,10 @@ class Grid {
 
             let neighbors = this.getNeighbors(current.r, current.c);
             for (let n of neighbors) {
-                if (!visited.has(`${n.r},${n.c}`) && this.cells[n.r][n.c] && this.cells[n.r][n.c].color === color) {
+                if (!visited.has(`${n.r},${n.c}`) &&
+                    this.cells[n.r][n.c] &&
+                    this.cells[n.r][n.c].color === color) {
+
                     visited.add(`${n.r},${n.c}`);
                     queue.push(n);
                 }

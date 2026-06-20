@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>WebGL Image Processing</title>
+    <style>
+        body { margin: 0; background-color: #333; }
+        canvas { width: 100vw; height: 100vh; display: block; }
+    </style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<script id="vertex-shader-2d" type="x-shader/x-fragment">
+    attribute vec2 a_position;
+    attribute vec2 a_texCoord; // Thuộc tính tọa độ ảnh mới
+
+    uniform vec2 u_resolution; // Độ phân giải để đưa pixel về Clip Space
+
+    varying vec2 v_texCoord;   // Cầu nối gửi tọa độ sang Fragment Shader
+
+    void main() {
+       // Chuyển đổi tọa độ từ pixel (0 -> width/height) sang không gian Clip Space (-1.0 -> +1.0)
+       vec2 zeroToOne = a_position / u_resolution;
+       vec2 zeroToTwo = zeroToOne * 2.0;
+       vec2 clipSpace = zeroToTwo - 1.0;
+
+       // Đảo ngược trục Y (WebGL mặc định gốc tọa độ ở dưới trái, màn hình máy tính ở trên trái)
+       gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+
+       // Truyền tọa độ texture sang Fragment Shader (GPU tự động nội suy)
+       v_texCoord = a_texCoord;
+    }
+</script>
+
+<script id="fragment-shader-2d" type="x-shader/x-fragment">
+    precision mediump float;
+
+    uniform sampler2D u_image;
+    uniform vec2 u_textureSize; // Kích thước pixel thật của ảnh
+
+    // Tọa độ đã được nội suy từ Vertex Shader
+    varying vec2 v_texCoord;
+
+    void main() {
+       // Tính toán khoảng cách của 1 pixel trong không gian 0.0 -> 1.0
+       vec2 onePixel = vec2(1.0, 1.0) / u_textureSize;
+
+       //gl_FragColor = texture2D(u_image, v_texCoord).bgra;
+
+       // tính trung bình trái phải giữa 3 pixel để làm mờ ảnh
+       gl_FragColor = (
+           texture2D(u_image, v_texCoord) +
+           texture2D(u_image, v_texCoord + vec2(onePixel.x, 0.0)) +
+           texture2D(u_image, v_texCoord + vec2(-onePixel.x, 0.0))) / 3.0;
+    }
+</script>
+
+<script src="main.js"></script>
+</body>
+</html>
